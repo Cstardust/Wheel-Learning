@@ -6,7 +6,7 @@
 
 ## 源码导图
 
-![ngx_mem_pool01](.\ngx_mem_pool01.png)
+![](./ngx_mem_pool01.png)
 
 ## class ngx_mem_pool导图
 
