@@ -10,7 +10,7 @@
 
 ## class ngx_mem_pool导图
 
-![image-20220501130619887](.\ngx_mem_pool.png)
+![](./ngx_mem_pool.png)
 
 ## 移植代码
 
