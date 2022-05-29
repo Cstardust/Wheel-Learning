@@ -2,7 +2,7 @@
 
 ## 源码剖析
 
-- 博客地址
+- [博客地址](https://cstardust.github.io/2022/04/22/nginx%E5%86%85%E5%AD%98%E6%B1%A0/)
 
 ## 源码导图
 
