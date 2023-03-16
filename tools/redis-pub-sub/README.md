@@ -1,0 +1,23 @@
+- 重要成员
+  - hiredis同步上下文对象，负责publish消息：redisContext *_publish_context;
+  - hiredis同步上下文对象，负责subscribe消息：redisContext *_subcribe_context;
+  - 回调操作，收到订阅的消息，给service层上报：function<void(int, string)> _notify_message_handler;
+
+- 连接 + 单独开启接收channel消息的线程：bool Redis::connect()
+- user通过publish消息到指定channel：bool Redis::publish(int channel, string message)
+- user subscribe消息 : SUBSCRIBE命令本身会造成线程阻塞等待通道里面发生消息。为避免subscribe阻塞主线程，我们将其分成两步
+  - 订阅channel
+    - bool Redis::subscribe(int channel)
+  - 循环且阻塞等待channel发布消息
+    - 且在发生消息时会调用user注册的callback：_notify_message_handler
+    - void Redis::observer_channel_message()
+  - 直接redisCommand("subscribe %d %s"); 会将12步放在一起执行. 
+    - 如果一起执行，那么会导致subscribe阻塞，那么为了避免阻塞io thread , 对于每个client的订阅，都需要单独开辟一个线程去redisCommand，然后阻塞等待消息. 开销大; 
+    - 所以我们把这个步骤拆开，先不阻塞的订阅（仅仅发送命令给redis，不阻塞等待接收消息）；然后单独开一个thread，去阻塞等待所有channel的消息
+- user如何使用该工具类？
+  - 对象构造
+  - redis_.connect()：连接redis，并开启另一个线程阻塞循环等待redis发布消息，调用相应callback
+  - redis_.init_notify_handler：注册callback.
+  - redis_.subscribe(id1,id2,id3....)：user订阅自己感兴趣的频道
+  - redis_.publish(id,data)：user向频道id发送data给redis
+  - redis_.unsubscribe(id)：user解除订阅
